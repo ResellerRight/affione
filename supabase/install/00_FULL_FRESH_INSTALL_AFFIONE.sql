@@ -102,6 +102,17 @@ create or replace function public.increment_product_view(p_product_id uuid) retu
 $$;
 grant execute on function public.increment_product_view(uuid) to anon, authenticated;
 
+-- API grants untuk Supabase anon/authenticated.
+grant usage on schema public to anon, authenticated;
+grant select on table public.stores to anon, authenticated;
+grant insert, update, delete on table public.stores to authenticated;
+grant select on table public.categories to anon, authenticated;
+grant insert, update, delete on table public.categories to authenticated;
+grant select on table public.products to anon, authenticated;
+grant insert, update, delete on table public.products to authenticated;
+grant insert on table public.click_events to anon, authenticated;
+grant select on table public.click_events to authenticated;
+
 alter table public.stores enable row level security;
 alter table public.categories enable row level security;
 alter table public.products enable row level security;
