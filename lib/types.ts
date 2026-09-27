@@ -28,6 +28,9 @@ export type Category = {
   slug: string
   is_active: boolean
   sort_order: number
+  icon_type?: 'default' | 'upload'
+  icon_name?: string | null
+  icon_image_url?: string | null
 }
 
 export type Product = {

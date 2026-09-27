@@ -3,8 +3,11 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { rupiah } from '@/lib/utils'
 
-const iconFor=(name:string)=>{
-  const n=name.toLowerCase()
+const iconMap:Record<string,string>={bag:'🛍️',electronics:'💻',fashion:'👕',beauty:'💄',home:'🏠',baby:'🍼',sport:'⚽',auto:'🚗',food:'🍜',book:'📚',game:'🎮',gift:'🎁'}
+const iconFor=(category:any)=>{
+  if(category?.icon_type==='upload'&&category?.icon_image_url)return <img src={category.icon_image_url} alt={category.name}/>
+  if(category?.icon_name&&iconMap[category.icon_name])return iconMap[category.icon_name]
+  const n=String(category?.name||'').toLowerCase()
   if(n.includes('elektr'))return '💻'; if(n.includes('fashion'))return '👕'; if(n.includes('cantik'))return '💄'; if(n.includes('rumah'))return '🏠'; if(n.includes('bayi'))return '🍼'; if(n.includes('olahraga'))return '⚽'; if(n.includes('otomotif'))return '🚗'; if(n.includes('makan'))return '🍜'; return '🛍️'
 }
 export default function Storefront({store,categories,products}:{store:any;categories:any[];products:any[]}){
@@ -21,7 +24,7 @@ export default function Storefront({store,categories,products}:{store:any;catego
       <div className="commerceHeroCopy"><span className="heroPill">♡ Affiliate Store</span><h1>{store.hero_title||'Produk Pilihan dari Shopee'}</h1><p>{store.hero_subtitle||store.tagline||'Harga terbaik, rekomendasi terpercaya.'}</p><div className="heroTrust"><span>✓ Produk Pilihan</span><span>✓ Banyak Pilihan</span><span>✓ Update Berkala</span></div><a className="heroBtn" href="#produk">{store.hero_cta||'Lihat Produk'}</a></div>
       {!store.banner_url&&<div className="heroVisual"><div className="heroBag">S</div><div className="floatCard one">📱</div><div className="floatCard two">🎧</div><div className="floatCard three">👟</div></div>}
     </section>
-    <section id="kategori" className="categoryRibbon"><button className={cat==='all'?'active':''} onClick={()=>setCat('all')}><span>▦</span><small>Semua</small></button>{categories.map(c=><button key={c.id} className={cat===c.id?'active':''} onClick={()=>setCat(c.id)}><span>{iconFor(c.name)}</span><small>{c.name}</small></button>)}</section>
+    <section id="kategori" className="categoryRibbon"><button className={cat==='all'?'active':''} onClick={()=>setCat('all')}><span>▦</span><small>Semua</small></button>{categories.map(c=><button key={c.id} className={cat===c.id?'active':''} onClick={()=>setCat(c.id)}><span>{iconFor(c)}</span><small>{c.name}</small></button>)}</section>
     <section id="produk" className="productSection"><div className="sectionTitle"><div><span>REKOMENDASI</span><h2>{cat==='all'?'Produk Terbaru':categories.find(c=>c.id===cat)?.name}</h2></div><small>{filtered.length} produk</small></div>
       <div className="productCards">{filtered.map(p=>{const discount=p.compare_at_price&&p.compare_at_price>p.price?Math.round((1-p.price/p.compare_at_price)*100):0;return <article className="commerceCard" key={p.id}>{p.badge&&<span className="cornerBadge">{p.badge}</span>}{p.video_url&&<span className="hasVideo">▶</span>}<Link className="commerceImage" href={`/produk/${p.slug}`}>{p.image_url?<img src={p.image_url} alt={p.name}/>:<span>🛍</span>}</Link><div className="commerceInfo"><Link href={`/produk/${p.slug}`}><h3>{p.name}</h3></Link><div className="priceLine"><b>{rupiah(p.price)}</b>{p.compare_at_price&&<del>{rupiah(p.compare_at_price)}</del>}{discount>0&&<em>-{discount}%</em>}</div><div className="ratingLine">★ {Number(p.rating||4.8).toFixed(1)} <span>| {(p.sold_count||0).toLocaleString('id-ID')} terjual</span></div><a className="shopBuy" href={`/api/track-click?product=${p.id}`} rel="nofollow sponsored">▣ Beli di {p.marketplace}</a></div></article>})}</div>
       {!filtered.length&&<div className="empty storeEmpty">Produk tidak ditemukan.</div>}

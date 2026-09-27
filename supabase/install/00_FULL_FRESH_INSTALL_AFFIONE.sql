@@ -1,4 +1,4 @@
--- AffiOne v1.0.4 FULL FRESH INSTALL - SINGLE OWNER / SINGLE STORE
+-- AffiOne v1.0.6 FULL FRESH INSTALL - SINGLE OWNER / SINGLE STORE
 -- Jalankan satu kali di Supabase SQL Editor.
 -- Setelah itu buat SATU akun owner di Authentication > Users dan nonaktifkan public sign-up.
 
@@ -36,6 +36,9 @@ create table if not exists public.categories (
   slug text not null,
   is_active boolean not null default true,
   sort_order int not null default 0,
+  icon_type text not null default 'default' check (icon_type in ('default','upload')),
+  icon_name text default 'bag',
+  icon_image_url text,
   created_at timestamptz not null default now(),
   unique(store_id,slug)
 );
@@ -153,6 +156,10 @@ insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types)
 values('product-images','product-images',true,5242880,array['image/jpeg','image/png','image/webp','image/gif'])
 on conflict(id) do update set public=true;
 
+insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types)
+values('category-icons','category-icons',true,3145728,array['image/png','image/jpeg','image/webp','image/gif','image/svg+xml'])
+on conflict(id) do update set public=true,file_size_limit=excluded.file_size_limit,allowed_mime_types=excluded.allowed_mime_types;
+
 drop policy if exists "product images public read" on storage.objects;
 create policy "product images public read" on storage.objects for select using(bucket_id='product-images');
 drop policy if exists "product images auth upload" on storage.objects;
@@ -162,7 +169,16 @@ create policy "product images owner update" on storage.objects for update to aut
 drop policy if exists "product images owner delete" on storage.objects;
 create policy "product images owner delete" on storage.objects for delete to authenticated using(bucket_id='product-images');
 
--- Default storefront + demo data v1.0.4
+drop policy if exists "category icons public read" on storage.objects;
+create policy "category icons public read" on storage.objects for select using(bucket_id='category-icons');
+drop policy if exists "category icons auth upload" on storage.objects;
+create policy "category icons auth upload" on storage.objects for insert to authenticated with check(bucket_id='category-icons');
+drop policy if exists "category icons auth update" on storage.objects;
+create policy "category icons auth update" on storage.objects for update to authenticated using(bucket_id='category-icons') with check(bucket_id='category-icons');
+drop policy if exists "category icons auth delete" on storage.objects;
+create policy "category icons auth delete" on storage.objects for delete to authenticated using(bucket_id='category-icons');
+
+-- Default storefront + demo data v1.0.6
 insert into public.stores(name,slug,tagline,description,accent_color,theme,is_active,seo_title,seo_description,hero_title,hero_subtitle,hero_cta,announcement)
 select 'AffiOne Store','main-store','Produk pilihan terbaik untuk kamu.','Temukan rekomendasi produk pilihan dan beli langsung melalui marketplace favoritmu.','#ff416c','soft',true,'AffiOne Store — Rekomendasi Produk','Kumpulan produk affiliate pilihan dalam satu toko.','Produk Pilihan dari Shopee','Harga terbaik, rekomendasi terpercaya.','Lihat Produk','Pilihan produk affiliate favorit minggu ini ✨'
 where not exists(select 1 from public.stores);
@@ -183,6 +199,17 @@ with s as (select id from public.stores order by created_at asc limit 1), c(name
 insert into public.categories(store_id,name,slug,sort_order,is_active)
 select s.id,c.name,c.slug,c.sort_order,true from s,c
 on conflict(store_id,slug) do nothing;
+update public.categories set icon_name=case
+  when slug ilike '%elektr%' then 'electronics'
+  when slug ilike '%fashion%' then 'fashion'
+  when slug ilike '%cantik%' then 'beauty'
+  when slug ilike '%rumah%' then 'home'
+  when slug ilike '%bayi%' then 'baby'
+  when slug ilike '%olahraga%' then 'sport'
+  when slug ilike '%otomotif%' then 'auto'
+  when slug ilike '%makan%' then 'food'
+  else coalesce(icon_name,'bag') end;
+
 
 -- Dummy product hanya dimasukkan bila toko masih belum punya produk.
 do $$
