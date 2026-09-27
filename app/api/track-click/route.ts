@@ -1,0 +1,4 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSupabase } from '@/lib/supabase'
+import { safeExternalUrl } from '@/lib/utils'
+export async function GET(req:NextRequest){const id=req.nextUrl.searchParams.get('product');if(!id)return NextResponse.redirect(new URL('/',req.url));const s=getServerSupabase();if(!s)return NextResponse.redirect(new URL('/',req.url));const {data:p}=await s.from('products').select('id,store_id,affiliate_url,is_published').eq('id',id).eq('is_published',true).single();if(!p)return NextResponse.redirect(new URL('/',req.url));const ref=req.headers.get('referer')||null;await s.from('click_events').insert({product_id:p.id,store_id:p.store_id,referrer:ref,user_agent:req.headers.get('user-agent')||null});await s.rpc('increment_product_click',{p_product_id:p.id});return NextResponse.redirect(safeExternalUrl(p.affiliate_url),302)}
