@@ -15,28 +15,25 @@ function youtubeEmbed(url:string){
   }catch{}
   return null
 }
+function isDirectVideo(url:string){try{return /\.(mp4|webm|ogg)(\?|#|$)/i.test(new URL(url).pathname+new URL(url).search)}catch{return false}}
 
-function isDirectVideo(url:string){
-  try{return /\.(mp4|webm|ogg)(\?|#|$)/i.test(new URL(url).pathname+new URL(url).search)}catch{return false}
-}
-
-export default function ProductMedia({imageUrl,videoUrl,name}:{imageUrl?:string|null;videoUrl?:string|null;name:string}){
-  const [active,setActive]=useState(videoUrl?'video':'image')
-  const yt=useMemo(()=>videoUrl?youtubeEmbed(videoUrl):null,[videoUrl])
-  const direct=!!videoUrl&&isDirectVideo(videoUrl)
-  const canEmbed=!!yt||direct
+type Media = {type:'image'|'video';url:string}
+export default function ProductMedia({imageUrl,galleryUrls,videoUrl,name}:{imageUrl?:string|null;galleryUrls?:string[]|null;videoUrl?:string|null;name:string}){
+  const media=useMemo<Media[]>(()=>{
+    const out:Media[]=[]
+    if(imageUrl) out.push({type:'image',url:imageUrl})
+    for(const url of galleryUrls||[]) if(url && !out.some(x=>x.url===url)) out.push({type:'image',url})
+    if(videoUrl) out.push({type:'video',url:videoUrl})
+    return out
+  },[imageUrl,galleryUrls,videoUrl])
+  const [active,setActive]=useState(0)
+  const item=media[active]||null
+  const yt=item?.type==='video'?youtubeEmbed(item.url):null
+  const direct=item?.type==='video'&&isDirectVideo(item.url)
   return <div className="mediaGallery">
     <div className="detailMedia">
-      {active==='video'&&videoUrl ? (
-        yt ? <iframe src={yt} title={`Video ${name}`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen/> :
-        direct ? <video src={videoUrl} controls playsInline preload="metadata" poster={imageUrl||undefined}/> :
-        <div className="videoFallback"><span>▶</span><b>Video Produk</b><p>Video dari sumber ini tidak dapat di-embed langsung.</p><a href={videoUrl} target="_blank" rel="noreferrer">Buka Video ↗</a></div>
-      ) : imageUrl ? <img src={imageUrl} alt={name}/> : <span className="mediaPlaceholder">✦</span>}
+      {!item?<span className="mediaPlaceholder">✦</span>:item.type==='image'?<img src={item.url} alt={name}/>:yt?<iframe src={yt} title={`Video ${name}`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen/>:direct?<video src={item.url} controls playsInline preload="metadata" poster={imageUrl||undefined}/>:<div className="videoFallback"><span>▶</span><b>Video Produk</b><p>Video dari sumber ini dibuka melalui sumber aslinya.</p><a href={item.url} target="_blank" rel="noreferrer">Buka Video ↗</a></div>}
     </div>
-    {(videoUrl||imageUrl)&&<div className="mediaThumbs">
-      {videoUrl&&<button type="button" className={active==='video'?'active':''} onClick={()=>setActive('video')}><span>▶</span><small>Video</small></button>}
-      {imageUrl&&<button type="button" className={active==='image'?'active':''} onClick={()=>setActive('image')}><img src={imageUrl} alt="Thumbnail produk"/><small>Foto</small></button>}
-    </div>}
-    {videoUrl&&!canEmbed&&<small className="mediaHint">URL tetap disimpan dan bisa dibuka di tab baru.</small>}
+    {media.length>1&&<div className="mediaThumbs">{media.map((m,i)=><button key={`${m.type}-${i}`} type="button" className={active===i?'active':''} onClick={()=>setActive(i)}>{m.type==='image'?<img src={m.url} alt={`Media ${i+1}`}/>:<><span>▶</span><small>Video</small></>}</button>)}</div>}
   </div>
 }

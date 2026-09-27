@@ -1,30 +1,31 @@
-# AffiOne v1.0.2 FULL
+# AffiOne v1.0.4 FULL
 **One Store for Every Affiliate Product.**
 
-AffiOne adalah **website toko affiliate pribadi (single owner / single store)**. Bukan SaaS dan bukan multi-user. Owner login ke dashboard, menambahkan produk sendiri, menempel link affiliate Shopee/TikTok Shop/Tokopedia/Lazada/lainnya, lalu pengunjung membuka toko langsung dari homepage domain.
+Single-owner affiliate storefront berbasis Next.js + TypeScript + Supabase + Vercel.
 
-## Stack
-- Next.js
-- Supabase Database + Auth + Storage
-- Vercel
+## Untuk instalasi yang SUDAH memakai AffiOne v1.0.2/v1.0.3
+1. Buka Supabase > SQL Editor.
+2. Jalankan **`UPDATE-SQL-v1.0.4.sql`** satu kali.
+3. Overwrite source repository GitHub dengan isi ZIP v1.0.4.
+4. Push/commit ke GitHub dan tunggu Vercel redeploy.
+5. Buka Dashboard > Tampilan Toko untuk mengubah banner/hero.
+6. Buka Dashboard > Produk untuk mengedit 20 dummy produk.
 
-## URL utama
-- `/` — storefront publik
-- `/produk/[slug]` — detail produk SEO-friendly
-- `/login` — login owner
-- `/dashboard` — dashboard owner
+SQL update tidak drop tabel dan tidak menghapus data lama. Dummy produk hanya di-seed bila toko masih 0 produk.
 
-## Instalasi ringkas
-1. Buat project Supabase.
-2. Jalankan `supabase/install/00_FULL_FRESH_INSTALL_AFFIONE.sql` satu kali.
-3. Di Supabase Authentication, buat **satu akun owner** secara manual.
-4. Nonaktifkan public sign-up di pengaturan Authentication supaya tidak ada user lain yang mendaftar.
-5. Copy `.env.example` menjadi `.env.local` dan isi Supabase URL + anon key + URL website.
-6. Jalankan `npm install` lalu `npm run build`.
-7. Deploy ke Vercel.
+## Untuk instalasi BARU
+Jalankan satu kali:
+`supabase/install/00_FULL_FRESH_INSTALL_AFFIONE.sql`
 
-Lihat `DOCUMENTATION/INSTALLATION-GUIDE.md` untuk langkah lengkap.
+Lalu buat 1 owner di Supabase Authentication, isi ENV, push ke GitHub, dan deploy ke Vercel.
 
+## ENV
+Lihat `.env.example`.
 
-## Media Produk
-Produk mendukung foto utama dan **Video URL**. URL MP4/WebM dapat diputar langsung, YouTube di-embed, dan URL video lain tetap disimpan dengan fallback buka video.
+## Struktur penting
+- `app/` Next.js App Router
+- `components/Storefront.tsx` storefront interaktif
+- `components/ProductForm.tsx` CRUD tambah/edit produk
+- `supabase/install/00_FULL_FRESH_INSTALL_AFFIONE.sql` fresh install
+- `supabase/migrations/002_v1.0.4_storefront_upgrade.sql` migration existing database
+- `UPDATE-SQL-v1.0.4.sql` query praktis untuk database existing

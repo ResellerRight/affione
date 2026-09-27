@@ -1,11 +1,15 @@
-# AffiOne v1.0.2 — Release Notes
+# AffiOne v1.0.4 — Storefront Commerce Upgrade
 
-- Single-owner / single-store tetap dipertahankan.
-- Menambahkan `video_url` pada produk.
-- Form Tambah/Edit Produk sekarang memiliki Foto Utama + Video URL.
-- Halaman detail produk memiliki galeri media Foto/Video.
-- Mendukung playback URL video langsung MP4/WebM/OGG.
-- Mendukung embed YouTube.
-- URL video dari sumber lain tetap disimpan dan ditampilkan sebagai tombol buka video bila tidak dapat di-embed.
-- Card storefront menampilkan badge `▶ Video` saat produk memiliki video.
-- Fresh installer Supabase sudah menyertakan kolom `video_url`.
+Upgrade besar tampilan storefront agar mengikuti mockup e-commerce AffiOne/TerryShop yang disepakati.
+
+## Perubahan utama
+- Storefront baru: header, search, hero banner, kategori icon, grid produk, CTA marketplace, mobile bottom navigation.
+- Detail produk baru: gallery foto, video, rating, sold count, harga coret, diskon, CTA besar, keunggulan, deskripsi.
+- Produk mendukung foto utama + banyak foto tambahan + video URL.
+- Field produk baru: slug editable, short description, highlights, rating, sold_count.
+- Pengaturan toko baru: headline hero, subheadline, CTA hero, announcement, banner URL.
+- Dashboard dipoles agar lebih dekat dengan mockup premium.
+- 20 dummy produk + 8 kategori otomatis ditambahkan HANYA bila toko existing masih memiliki 0 produk.
+- Dummy produk adalah data normal: bisa diedit, dihapus, draft/publish dari dashboard.
+- Existing database tidak di-reset. Gunakan `UPDATE-SQL-v1.0.4.sql`.
+- Fresh installer tetap tersedia untuk instalasi baru.
